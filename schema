@@ -1,0 +1,48 @@
+Schema Design
+Table: input_types
+Column Name	Data Type	Constraints	Description
+type_id	INT	PRIMARY KEY AUTO_INCREMENT	Unique identifier for each type
+type_name	VARCHAR(255)	NOT NULL	Name of the input type
+Table: fiserver_staging_data
+Column Name	Data Type	Constraints	Description
+id	INT	PRIMARY KEY AUTO_INCREMENT	Unique identifier for each record
+type_id	INT	NOT NULL	Foreign key referencing input_types table
+data	JSON	NOT NULL	JSON data
+json_metadata	JSON	NULL	JSON metadata
+SQL Statements
+Here are the SQL statements to create these tables in a PostgreSQL database:
+
+sql
+Copy code
+-- Table for input types
+CREATE TABLE input_types (
+    type_id SERIAL PRIMARY KEY,
+    type_name VARCHAR(255) NOT NULL
+);
+
+-- Table for staging data
+CREATE TABLE fiserver_staging_data (
+    id SERIAL PRIMARY KEY,
+    type_id INT NOT NULL,
+    data JSON NOT NULL,
+    json_metadata JSON,
+    FOREIGN KEY (type_id) REFERENCES input_types(type_id)
+);
+For MySQL, the syntax is similar:
+
+sql
+Copy code
+-- Table for input types
+CREATE TABLE input_types (
+    type_id INT AUTO_INCREMENT PRIMARY KEY,
+    type_name VARCHAR(255) NOT NULL
+);
+
+-- Table for staging data
+CREATE TABLE fiserver_staging_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type_id INT NOT NULL,
+    data JSON NOT NULL,
+    json_metadata JSON,
+    FOREIGN KEY (type_id) REFERENCES input_types(type_id)
+);
