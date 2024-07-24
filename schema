@@ -1,48 +1,41 @@
 Schema Design
-Table: input_types
+Table: ceh_api_staging_data
 Column Name	Data Type	Constraints	Description
-type_id	INT	PRIMARY KEY AUTO_INCREMENT	Unique identifier for each type
-type_name	VARCHAR(255)	NOT NULL	Name of the input type
-Table: fiserver_staging_data
+id	SERIAL	PRIMARY KEY	Auto-incremented identifier
+create_date	TIMESTAMP	NOT NULL DEFAULT CURRENT_TIMESTAMP	Date and time in UTC
+data_type	VARCHAR(500)	NOT NULL	Data type with a length of 500
+json_metadata_type_id	INT	REFERENCES ceh_api_json_metadata_type(json_metadata_type_id)	Foreign key referencing json_metadata_type_id
+req_name	VARCHAR(100)	NOT NULL	Request name with a length of 100
+json_text_data	TEXT	NOT NULL	JSON text data
+data_identifier	BOOLEAN	NOT NULL	Data identifier (U/I boolean)
+status	VARCHAR(10)	NOT NULL CHECK (status IN ('pending', 'processed'))	Status of the data (pending/processed)
+
+
+Table: ceh_api_json_metadata_type
 Column Name	Data Type	Constraints	Description
-id	INT	PRIMARY KEY AUTO_INCREMENT	Unique identifier for each record
-type_id	INT	NOT NULL	Foreign key referencing input_types table
-data	JSON	NOT NULL	JSON data
-json_metadata	JSON	NULL	JSON metadata
+json_metadata_type_id	SERIAL	PRIMARY KEY	Auto-incremented identifier
+name	VARCHAR(100)	NOT NULL	Name with a length of 100
+json_metadata_type	TEXT	NOT NULL	JSON metadata type
+
+
 SQL Statements
 Here are the SQL statements to create these tables in a PostgreSQL database:
 
-sql
-Copy code
--- Table for input types
-CREATE TABLE input_types (
-    type_id SERIAL PRIMARY KEY,
-    type_name VARCHAR(255) NOT NULL
+-- Table: ceh_api_json_metadata_type
+CREATE TABLE ceh_api_json_metadata_type (
+    json_metadata_type_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    json_metadata_type TEXT NOT NULL
 );
 
--- Table for staging data
-CREATE TABLE fiserver_staging_data (
+-- Table: ceh_api_staging_data
+CREATE TABLE ceh_api_staging_data (
     id SERIAL PRIMARY KEY,
-    type_id INT NOT NULL,
-    data JSON NOT NULL,
-    json_metadata JSON,
-    FOREIGN KEY (type_id) REFERENCES input_types(type_id)
-);
-For MySQL, the syntax is similar:
-
-sql
-Copy code
--- Table for input types
-CREATE TABLE input_types (
-    type_id INT AUTO_INCREMENT PRIMARY KEY,
-    type_name VARCHAR(255) NOT NULL
-);
-
--- Table for staging data
-CREATE TABLE fiserver_staging_data (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    type_id INT NOT NULL,
-    data JSON NOT NULL,
-    json_metadata JSON,
-    FOREIGN KEY (type_id) REFERENCES input_types(type_id)
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_type VARCHAR(500) NOT NULL,
+    json_metadata_type_id INT REFERENCES ceh_api_json_metadata_type(json_metadata_type_id),
+    req_name VARCHAR(100) NOT NULL,
+    json_text_data TEXT NOT NULL,
+    data_identifier BOOLEAN NOT NULL,
+    status VARCHAR(10) NOT NULL CHECK (status IN ('pending', 'processed'))
 );
