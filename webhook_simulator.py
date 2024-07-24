@@ -86,8 +86,8 @@ def generate_random_data():
     ]
     return random.choice(sources)
 
-def send_request(url, endpoint, data):
-    conn = http.client.HTTPConnection(url)
+def send_request(url, endpoint, data, timeout=0.5):
+    conn = http.client.HTTPConnection(url, timeout=timeout)
     headers = {
         'Authorization': 'Bearer dummy_token',
         'Content-Type': 'application/json'
@@ -107,7 +107,8 @@ def send_request(url, endpoint, data):
         status_counts["no_response"] += 1
         return str(exc)
 
-def main(url, endpoint, total_requests, rate_per_second):
+def main(url, endpoint, rate_per_second, request_seconds):
+    total_requests = rate_per_second * request_seconds
     with open("request_results.txt", "w") as log_file:
         with ThreadPoolExecutor(max_workers=rate_per_second) as executor:
             future_to_request = {
@@ -120,9 +121,6 @@ def main(url, endpoint, total_requests, rate_per_second):
                     log_file.write(result + "\n")
                 except Exception as exc:
                     log_file.write(f'Generated an exception: {exc}\n')
-                # Maintain the rate of requests per second
-                if len(future_to_request) % rate_per_second == 0:
-                    time.sleep(1)
             end_time = time.time()
         
         # Print summary
@@ -136,7 +134,7 @@ def main(url, endpoint, total_requests, rate_per_second):
 if __name__ == "__main__":
     url = "localhost:8080"  # Replace with your actual webhook URL (without the http:// prefix)
     endpoint = "/sap/getFolderPath"  # Replace with the actual endpoint if needed
-    total_requests = 4000  # Total number of requests to be sent (400 requests per second * 10 seconds)
     rate_per_second = 400  # Requests per second
+    request_seconds = 1  # Duration of the test in seconds
 
-    main(url, endpoint, total_requests, rate_per_second)
+    main(url, endpoint, rate_per_second, request_seconds)
