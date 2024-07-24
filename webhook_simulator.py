@@ -4,6 +4,13 @@ import time
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+# Status counters
+status_counts = {
+    "successful": 0,
+    "failed": 0,
+    "no_response": 0
+}
+
 def generate_random_data():
     sources = [
         {
@@ -86,11 +93,19 @@ def send_request(url, endpoint, data):
         'Content-Type': 'application/json'
     }
     json_data = json.dumps(data)
-    conn.request('POST', endpoint, body=json_data, headers=headers)
-    response = conn.getresponse()
-    result = response.read().decode()
-    conn.close()
-    return result
+    try:
+        conn.request('POST', endpoint, body=json_data, headers=headers)
+        response = conn.getresponse()
+        if response.status == 200:
+            status_counts["successful"] += 1
+        else:
+            status_counts["failed"] += 1
+        result = response.read().decode()
+        conn.close()
+        return result
+    except Exception as exc:
+        status_counts["no_response"] += 1
+        return str(exc)
 
 def main(url, endpoint, total_requests, rate_per_second):
     with ThreadPoolExecutor(max_workers=rate_per_second) as executor:
@@ -107,6 +122,15 @@ def main(url, endpoint, total_requests, rate_per_second):
             # Maintain the rate of requests per second
             if len(future_to_request) % rate_per_second == 0:
                 time.sleep(1)
+        end_time = time.time()
+    
+    # Print summary
+    print("\nSummary:")
+    print(f"Total requests: {total_requests}")
+    print(f"Successful requests: {status_counts['successful']}")
+    print(f"Failed requests: {status_counts['failed']}")
+    print(f"No response: {status_counts['no_response']}")
+    print(f"Total time taken: {end_time - start_time:.2f} seconds")
 
 if __name__ == "__main__":
     url = "localhost:8080"  # Replace with your actual webhook URL (without the http:// prefix)
