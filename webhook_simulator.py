@@ -108,29 +108,30 @@ def send_request(url, endpoint, data):
         return str(exc)
 
 def main(url, endpoint, total_requests, rate_per_second):
-    with ThreadPoolExecutor(max_workers=rate_per_second) as executor:
-        future_to_request = {
-            executor.submit(send_request, url, endpoint, generate_random_data()): i for i in range(total_requests)
-        }
-        start_time = time.time()
-        for future in as_completed(future_to_request):
-            try:
-                result = future.result()
-                print(result)
-            except Exception as exc:
-                print(f'Generated an exception: {exc}')
-            # Maintain the rate of requests per second
-            if len(future_to_request) % rate_per_second == 0:
-                time.sleep(1)
-        end_time = time.time()
-    
-    # Print summary
-    print("\nSummary:")
-    print(f"Total requests: {total_requests}")
-    print(f"Successful requests: {status_counts['successful']}")
-    print(f"Failed requests: {status_counts['failed']}")
-    print(f"No response: {status_counts['no_response']}")
-    print(f"Total time taken: {end_time - start_time:.2f} seconds")
+    with open("request_results.txt", "w") as log_file:
+        with ThreadPoolExecutor(max_workers=rate_per_second) as executor:
+            future_to_request = {
+                executor.submit(send_request, url, endpoint, generate_random_data()): i for i in range(total_requests)
+            }
+            start_time = time.time()
+            for future in as_completed(future_to_request):
+                try:
+                    result = future.result()
+                    log_file.write(result + "\n")
+                except Exception as exc:
+                    log_file.write(f'Generated an exception: {exc}\n')
+                # Maintain the rate of requests per second
+                if len(future_to_request) % rate_per_second == 0:
+                    time.sleep(1)
+            end_time = time.time()
+        
+        # Print summary
+        log_file.write("\nSummary:\n")
+        log_file.write(f"Total requests: {total_requests}\n")
+        log_file.write(f"Successful requests: {status_counts['successful']}\n")
+        log_file.write(f"Failed requests: {status_counts['failed']}\n")
+        log_file.write(f"No response: {status_counts['no_response']}\n")
+        log_file.write(f"Total time taken: {end_time - start_time:.2f} seconds\n")
 
 if __name__ == "__main__":
     url = "localhost:8080"  # Replace with your actual webhook URL (without the http:// prefix)
