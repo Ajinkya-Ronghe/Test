@@ -11,3 +11,16 @@
                 </archive>
             </configuration>
         </plugin>
+
+<plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>2.5.14</version> <!-- or your specific version -->
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
