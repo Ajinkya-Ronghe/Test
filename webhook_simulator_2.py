@@ -9,12 +9,10 @@ import logging
 
 # Configuration
 ENDPOINT = "http://localhost:8081/api/sendrequest"
-REQUESTS_PER_SECOND = 400
+REQUESTS_PER_SECOND = 4
 REQUEST_SECONDS = 1  # Total simulation time in seconds
 TOTAL_REQUESTS = REQUESTS_PER_SECOND * REQUEST_SECONDS
-DATA_PER_MINUTE_MB = 200
-DATA_PER_SECOND_MB = DATA_PER_MINUTE_MB / 60
-DATA_PER_REQUEST_MB = DATA_PER_SECOND_MB / REQUESTS_PER_SECOND
+DATA_PER_REQUEST_MB = 20  # Data per request in MB
 DATA_PER_REQUEST_BYTES = DATA_PER_REQUEST_MB * 1024 * 1024
 NUM_CONNECTIONS = 50  # Number of different connections
 
@@ -110,11 +108,8 @@ Duration: {duration:.2f} seconds
 print(report)
 
 # Save the report to a file
-with open("simulation_report.txt", "w") as report_file:
+with open("simulation_report.txt", "w") as report_file, open("detailed_requests_report.txt", "w") as detailed_report_file:
     report_file.write(report)
-
-# Save detailed request logs to a separate file
-with open("detailed_requests_report.txt", "w") as detailed_report_file:
     for detail in results["details"]:
         detailed_report_file.write(f"{json.dumps(detail)}\n")
 
