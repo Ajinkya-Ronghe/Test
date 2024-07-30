@@ -9,7 +9,7 @@ import logging
 
 # Configuration
 ENDPOINT = "http://localhost:8081/api/sendrequest"
-REQUESTS_PER_SECOND = 4
+REQUESTS_PER_SECOND = 400
 REQUEST_SECONDS = 1  # Total simulation time in seconds
 TOTAL_REQUESTS = REQUESTS_PER_SECOND * REQUEST_SECONDS
 DATA_PER_REQUEST_MB = 20  # Data per request in MB
@@ -82,9 +82,12 @@ def run_simulation():
     with concurrent.futures.ThreadPoolExecutor(max_workers=REQUESTS_PER_SECOND) as executor:
         future_to_request = {executor.submit(send_request, random.choice(sessions), i): i for i in range(TOTAL_REQUESTS)}
         for future in concurrent.futures.as_completed(future_to_request):
-            request_details = future.result()
-            results["details"].append(request_details)
-            results[request_details["status"]] += 1
+            try:
+                request_details = future.result()
+                results["details"].append(request_details)
+                results[request_details["status"]] += 1
+            except Exception as exc:
+                logging.error(f"Request generated an exception: {exc}")
     
     return results
 
@@ -103,13 +106,23 @@ Success: {results['success']}
 Failure: {results['failure']}
 No Response: {results['no_response']}
 Duration: {duration:.2f} seconds
+
+Detailed Requests:
+==================
 """
+
+# Append detailed request information to the report
+for detail in results["details"]:
+    report += f"Request ID: {detail['request_id']}, URL: {detail['url']}, Payload Size: {detail['payload_size']} bytes, Status: {detail['status']}, Status Code: {detail['status_code']}, Exception: {detail['exception']}\n"
 
 print(report)
 
 # Save the report to a file
-with open("simulation_report.txt", "w") as report_file, open("detailed_requests_report.txt", "w") as detailed_report_file:
+with open("simulation_report.txt", "w") as report_file:
     report_file.write(report)
+
+# Save detailed request logs to a separate file
+with open("detailed_requests_report.txt", "w") as detailed_report_file:
     for detail in results["details"]:
         detailed_report_file.write(f"{json.dumps(detail)}\n")
 
