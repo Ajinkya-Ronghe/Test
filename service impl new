@@ -1,0 +1,39 @@
+package com.infy.ceh.management.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+
+@Service
+public class RequestServiceImpl implements RequestService {
+
+    private final LinkedBlockingQueue<String> dataQueue = new LinkedBlockingQueue<>();
+
+    private final ExecutorService executorService;
+
+    @Autowired
+    public RequestServiceImpl(ExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    // Existing methods...
+
+    public String processLargeData(String largeData) {
+        executorService.submit(() -> handleData(largeData));
+        return "Data is being processed";
+    }
+
+    private void handleData(String data) {
+        try {
+            dataQueue.put(data);
+            // Process the data from the queue here
+            String processedData = dataQueue.take();
+            System.out.println("Processing data: " + processedData);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            // Handle the interruption
+        }
+    }
+}
