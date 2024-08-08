@@ -1,0 +1,13 @@
+Subject: Request to Increase SAML AssertionLifetime for Extended Token Validity
+
+Dear [PingFederate Team/Specific Contact Person],
+
+I hope this email finds you well.
+
+We are currently utilizing PingFederate for SAML-based authentication in our application. However, we have encountered a requirement to extend the validity of our access tokens. Specifically, we need the tokens to remain valid for up to 8 hours to better align with our operational needs.
+
+We understand that this may involve adjusting the AssertionLifetime attribute or exploring other feasible solutions within PingFederate. We would greatly appreciate your assistance in making this adjustment or providing guidance on alternative solutions to achieve the desired token validity period.
+
+If there are any specific steps or configurations required on our end, please let us know, and we will ensure they are promptly implemented.
+
+Thank you for your support and assistance.
