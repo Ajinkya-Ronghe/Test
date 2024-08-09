@@ -1,13 +1,3 @@
-import requests
-import json
-
-url = "localhost:8081/api/sendrequest?type=adfdf"
-
-payload = json.dumps({})
-headers = {
-  'Content-Type': 'application/json'
-}
-
-response = requests.request("POST", url, headers=headers, data=payload)
-
-print(response.text)
+curl --location 'localhost:8081/api/sendrequest?type=adfdf' \
+--header 'Content-Type: application/json' \
+--data '{}'
